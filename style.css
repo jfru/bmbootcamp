@@ -1,6 +1,8 @@
 
+
 body {
   font-family: sans-serif;
+  overflow: hidden; /* Prevent scrolling */
   margin: 0;
   background-color: #000;
   color: white;
@@ -8,6 +10,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100vw;
 }
 #app {
   text-align: center;
@@ -17,25 +20,59 @@ body {
   margin-bottom: 20px;
 }
 .hebrew {
-  font-size: 2em;
-  font-weight: bold;
+  font-family: "Noto Sans Hebrew New";
+  font-size: 64px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }
 .translit {
+  font-family: Inter;
+  font-size: 24px;
   font-style: italic;
-  margin-bottom: 1em;
+  font-weight: 300;
+  line-height: normal;
 }
 button {
-  margin: 10px;
-  padding: 10px 20px;
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 48px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.highlight {
-  color: orange;
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
+
+/* .highlight {
+background: orange;
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+} */
+
 video {
   width: 100%;
-  max-width: 320px;
-  aspect-ratio: 9 / 16;
-  object-fit: contain;
-  margin: 0 auto;
+  height: auto;
+  object-fit: cover;
   display: block;
+}
+
+@media (max-width: 768px) {
+  video {
+    width: 100vw;
+    height: 100vh;
+  }
+}
+
+.button_text {
+  font-size: 2em;
+  font-weight: bold;
+  color: white;
 }
