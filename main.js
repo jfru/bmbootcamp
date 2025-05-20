@@ -106,40 +106,6 @@ let segmentIndex = 0;
 let repetitionIndex = 0;
 let shouldAutoPlayVideo = false;
 
-
-async function applyHighlightBackground(gsUrl) {
-  try {
-    console.log("Starting applyHighlightBackground");
-    const storageRef = storage.refFromURL(gsUrl);
-    const downloadURL = await storageRef.getDownloadURL();
-    console.log("Got download URL:", downloadURL);
-
-    // Add a style element to the document head with the background styling
-    const style = document.createElement('style');
-    style.textContent = `
-      .highlight {
-        background: linear-gradient(0deg, rgba(240, 188, 43, 0.55) 0%, rgba(240, 188, 43, 0.55) 100%), url('${downloadURL}') lightgray 50% / cover no-repeat !important;
-        background-clip: text !important;
-        -webkit-background-clip: text !important;
-        color: transparent !important;
-      }
-    `;
-    document.head.appendChild(style);
-    console.log("Style element added to head");
-
-    // Check if elements with .highlight class exist
-    const highlightElements = document.querySelectorAll('.highlight');
-    console.log("Number of .highlight elements found:", highlightElements.length);
-  } catch (error) {
-    console.error("Error applying highlight background:", error);
-  }
-}
-
-window.onload = () => {
-  render(); // Ensure this is called if needed
-  applyHighlightBackground('gs://bmbootcamp-e38fb.appspot.com/assets/Rough-Chiseled-1A1-e1381839098947.jpeg');
-}
-
 function render() {
   const app = document.getElementById("app");
   const segment = verseData.segments[segmentIndex];

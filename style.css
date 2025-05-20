@@ -1,4 +1,6 @@
-
+:root {
+  --image-text-fill: linear-gradient(0deg, rgba(240, 188, 43, 0.55) 0%, rgba(240, 188, 43, 0.55) 100%), url('https://raw.githubusercontent.com/jfru/bmbootcamp/main/assets/Rough-Chiseled-1A1-e1381839098947.jpeg') lightgray 50% / cover no-repeat;
+}
 
 body {
   font-family: sans-serif;
@@ -50,12 +52,12 @@ button:hover {
   box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
-/* .highlight {
-background: orange;
-background-clip: text;
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-} */
+.highlight {
+  background: var(--image-text-fill);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+} 
 
 video {
   width: 100%;
