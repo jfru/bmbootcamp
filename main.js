@@ -8,7 +8,7 @@ const verseData = {
     },
     {
       type: "tutorial",
-      videoUrl: "gs://bmbootcamp-e38fb.firebasestorage.app/video_files/Haz_5_29_part_1.mp4"
+      videoUrl: "gs://bmbootcamp-e38fb.firebasestorage.app/video_files/test_video.mp4"
     },
     {
       type: "instruction",
@@ -18,19 +18,19 @@ const verseData = {
       type: "repetition",
       cards: [
         {
-          hebrew: "לוּ חָכְמוּ",
+          hebrew: "ל֥וּ חָכְמ֖וּ",
           transliteration: "loo chachemu",
           audioUrl: "gs://bmbootcamp-e38fb.firebasestorage.app/audio_files/Haz_5_29_audio_part_1.m4a",
           highlightIndex: 0
         },
         {
-          hebrew: "יַשְׂכִּילוּ",
+          hebrew: "יַשְׂכִּ֣ילוּ",
           transliteration: "yashkilu",
           audioUrl: "gs://bmbootcamp-e38fb.firebasestorage.app/audio_files/Haz_5_29_audio_part_2.m4a",
           highlightIndex: 1
         },
         {
-          hebrew: "זֹאת",
+          hebrew: "זֹ֑את",
           transliteration: "zot",
           audioUrl: "gs://bmbootcamp-e38fb.firebasestorage.app/audio_files/Haz_5_29_audio_part_3.m4a",
           highlightIndex: 2
@@ -106,6 +106,8 @@ let segmentIndex = 0;
 let repetitionIndex = 0;
 let shouldAutoPlayVideo = false;
 
+const phone = document.querySelector('.phone');
+
 function render() {
   const app = document.getElementById("app");
   const segment = verseData.segments[segmentIndex];
@@ -142,12 +144,13 @@ function render() {
       video.muted = false;
 
       video.addEventListener("ended", () => {
+        video.remove();
         segmentIndex += 2; // skip tapStart and tutorial (already handled)
         render();
       });
   
       app.innerHTML = "";
-      app.appendChild(video);
+      phone.appendChild(video);
   
       video.play().catch(err => {
         console.warn("Autoplay failed:", err);
@@ -201,8 +204,9 @@ function render() {
     const playBtn = document.createElement("button");
     playBtn.textContent = "Play Sound";
     playBtn.onclick = () => playAudio();
-    app.appendChild(wrapper);
-    app.appendChild(playBtn);
+    wrapper.appendChild(playBtn);
+
+    phone.appendChild(wrapper);
   }
 
   // GLOBAL NEXT BUTTON (skip for tutorial)
@@ -235,6 +239,7 @@ function nextStep() {
 
   render();
 }
+
 
 function playAudio() {
   const segment = verseData.segments[segmentIndex];
