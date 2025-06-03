@@ -18,7 +18,7 @@ const Welcome = () => {
                     </Typography>
                     <img src={sparkles} />
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} sx={{cursor: 'pointer'}}>
+                <Grid item xs={12} sm={6} md={4} sx={{cursor: 'pointer'}} onClick={() => navigate('/torah')}>
                     <Typography variant="h4" component="h2">
                         reading
                     </Typography>

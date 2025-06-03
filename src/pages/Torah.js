@@ -2,7 +2,7 @@ import { Box, Button, Container, Typography } from '@mui/material'
 import React from 'react'
 import Phrase from './Phrase';
 
-const Blessing = () => {
+const Torah = () => {
     const [start, setStart] = React.useState(false);
     return (
         <Container style={{ textAlign: 'center', justifyContent: 'center', height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -10,11 +10,11 @@ const Blessing = () => {
                 ? <Phrase />
                 : <>
                     <Typography variant="h2" component="h1" gutterBottom fontWeight={600}>
-                        blessing before reading the torah
+                        Listen to the Phrase
                     </Typography>
                     <Box>
-                        <Button size={'large'} variant="contained" sx={{ marginRight: 2, textTransform: 'lowercase' }} onClick={() => alert('Blessing completed!')}>
-                            let's go!
+                        <Button size={'large'} variant="contained" sx={{ marginRight: 2, textTransform: 'lowercase' }} onClick={() => setStart(true)}>
+                            ok!
                         </Button>
                     </Box>
                 </>
@@ -24,4 +24,4 @@ const Blessing = () => {
     )
 }
 
-export default Blessing
+export default Torah

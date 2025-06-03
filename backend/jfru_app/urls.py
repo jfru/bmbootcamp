@@ -4,4 +4,5 @@ from .views import *
 
 urlpatterns = [
     path('blessing/', blessing, name='blessing'),
+    path('torah/<int:verse_id>', torah, name='torah'),
 ]
