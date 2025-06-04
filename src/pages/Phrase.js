@@ -1,99 +1,179 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { MAIN_URL } from "../utils/urls";
+import { Button } from "@mui/material";
 
 const Phrase = () => {
-	const [verseData, setVerseData] = useState(null);
-	const [audioUrls, setAudioUrls] = useState([]);
-	const [playingWordIndex, setPlayingWordIndex] = useState(null);
-	const [userPlayingIndex, setUserPlayingIndex] = useState(null);
+	const [verseData, setVerseData] = useState({});
+	const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
 	const [isUserTurn, setIsUserTurn] = useState(false);
+	const [playingWordIndex, setPlayingWordIndex] = useState(null);
+	const [audioRefs, setAudioRefs] = useState([]);
+	const [userPlayingIndex, setUserPlayingIndex] = useState(null);
+	const [playingFullPhraseIndex, setPlayingFullPhraseIndex] = useState(null);
 
-	// Fetch phrase 1 on load
 	useEffect(() => {
 		axios
 			.get(`${MAIN_URL}/torah/1`)
 			.then(response => {
-				const phrase = response.data.phrases[0]; // Only phrase 1
-				const updatedWords = phrase.words.map(word => ({
-					text: word.text,
-					audio: `${MAIN_URL}${word.audio}`,
-				}));
-				setVerseData({ words: updatedWords });
-				setAudioUrls(updatedWords.map(w => w.audio));
+				const updatedData = {
+					...response.data,
+					phrases: response.data.phrases.map(phrase => ({
+						...phrase,
+						words: phrase.words.map(word => ({
+							...word,
+							audio: `${MAIN_URL}${word.audio}`, // <- add backend URL prefix
+						})),
+					})),
+				};
+				setVerseData(updatedData);
+				console.log(updatedData);
 			})
 			.catch(error => {
-				console.error("Error fetching data:", error);
+				console.error("There was an error fetching the blessing data!", error);
 			});
 	}, []);
 
-	// Auto-play once audio URLs are loaded
 	useEffect(() => {
-		if (audioUrls.length > 0) {
-			playSequentially();
+		if (verseData) {
+			const refs = verseData?.phrases?.map(phrase => phrase?.words?.map(word => new Audio(word?.audio)));
+			setAudioRefs(refs);
 		}
-	}, [audioUrls]);
+	}, [verseData]);
 
-	// Sequential word-by-word playback
-	const playSequentially = async () => {
-		setIsUserTurn(false);
-		setUserPlayingIndex(null);
+	const playPhrase = async (phraseIdx, isFullPhrase = false) => {
+		const phraseAudios = audioRefs[phraseIdx];
+		if (!phraseAudios) return;
 
-		for (let i = 0; i < audioUrls.length; i++) {
+		if (isFullPhrase) setPlayingFullPhraseIndex(phraseIdx);
+
+		for (let i = 0; i < phraseAudios.length; i++) {
 			setPlayingWordIndex(i);
-
 			await new Promise(resolve => {
-				const audio = new Audio(audioUrls[i]);
-				audio.onended = resolve;
-				audio.onerror = resolve;
+				const audio = phraseAudios[i];
+				audio.onended = () => {
+					resolve();
+				};
 				audio.play();
 			});
 		}
 
 		setPlayingWordIndex(null);
-		setIsUserTurn(true);
+		if (isFullPhrase) setPlayingFullPhraseIndex(null);
+		else setIsUserTurn(true);
 	};
 
-	// User plays a word by clicking
-	const playUserWord = index => {
-		if (!isUserTurn || !audioUrls[index]) return;
+	useEffect(() => {
+		if (audioRefs?.length > 0 && currentPhraseIndex !== -1) {
+			playPhrase(currentPhraseIndex);
+		}
+	}, [currentPhraseIndex, audioRefs]);
 
-		setUserPlayingIndex(index);
-		setPlayingWordIndex(null);
-
-		const audio = new Audio(audioUrls[index]);
-		audio.onended = () => setUserPlayingIndex(null);
-		audio.play();
+	const handleNext = () => {
+		if (currentPhraseIndex + 1 < verseData?.phrases?.length) {
+			setCurrentPhraseIndex(currentPhraseIndex + 1);
+			setIsUserTurn(false);
+		} else {
+			setCurrentPhraseIndex(-1); // Show full verse
+			setIsUserTurn(false);
+		}
 	};
 
 	return (
-		<div style={{ fontSize: "24px", direction: "rtl", padding: "20px" }}>
-			{verseData && (
-				<div>
-					{verseData.words.map((word, idx) => {
-						const isHighlighted = idx === playingWordIndex || idx === userPlayingIndex;
-						return (
-							<span
-								key={idx}
-								onClick={() => playUserWord(idx)}
-								style={{
-									color: isHighlighted ? "rgba(224, 157, 47, 1)" : "#fff",
-									fontSize: "64px",
-									margin: "0 8px",
-									cursor: isUserTurn ? "pointer" : "default",
-								}}
-							>
-								{word.text}
-							</span>
-						);
-					})}
-				</div>
-			)}
+		<div style={{ fontSize: "24px", direction: "rtl" }}>
+			{currentPhraseIndex >= 0 ? (
+				<>
+					<div>
+						{verseData?.phrases &&
+							verseData?.phrases[currentPhraseIndex]?.words.map((word, i) => (
+								<div
+									key={i}
+									style={{
+										display: "inline-block",
+										textAlign: "center",
+										cursor: isUserTurn ? "pointer" : "default",
+									}}
+								>
+									<span
+										onClick={() => {
+											if (isUserTurn) {
+												const audio = audioRefs[currentPhraseIndex][i];
+												setUserPlayingIndex(i);
 
-			{isUserTurn && (
-				<p style={{ color: "#fff", fontSize: "24px", marginTop: "20px" }}>
-					Your turn: click the words to practice
-				</p>
+												const clearUserHighlight = () => {
+													setUserPlayingIndex(null);
+													audio.removeEventListener("ended", clearUserHighlight); // clean up
+												};
+
+												audio.addEventListener("ended", clearUserHighlight);
+												audio.play();
+											}
+										}}
+										style={{
+											color:
+												!isUserTurn && i === playingWordIndex
+													? "rgba(224, 157, 47, 1)"
+													: isUserTurn && i === userPlayingIndex
+													? "rgba(224, 157, 47, 1)"
+													: "#fff",
+											padding: "2px 6px",
+											borderRadius: "4px",
+											fontSize: "64px",
+											display: "block",
+											marginRight: "10px",
+										}}
+									>
+										{word?.text}
+									</span>
+									<span
+										style={{
+											color:
+												!isUserTurn && i === playingWordIndex
+													? "rgba(224, 157, 47, 1)"
+													: isUserTurn && i === userPlayingIndex
+													? "rgba(224, 157, 47, 1)"
+													: "#fff",
+
+											fontSize: "16px",
+											display: "block",
+											marginTop: "4px",
+										}}
+									>
+										{word?.english_text ? `(${word.english_text})` : ""}
+									</span>
+								</div>
+							))}
+					</div>
+
+					{isUserTurn && (
+						<div style={{ marginTop: "20px" }}>
+							<p>Your turn: click the words to practice</p>
+							<Button size={"large"} variant="contained" onClick={handleNext}>
+								Next Phrase
+							</Button>
+						</div>
+					)}
+				</>
+			) : (
+				<>
+					<h3>{verseData?.reference}</h3>
+					{verseData?.phrases?.map((phrase, pIdx) => (
+						<p
+							key={pIdx}
+							onClick={() => playPhrase(pIdx, true)}
+							style={{
+								cursor: "pointer",
+								color: playingFullPhraseIndex === pIdx ? "rgba(224, 157, 47, 1)" : "#fff", // highlight if playing
+								padding: "8px",
+								borderRadius: "6px",
+								marginBottom: "10px",
+								fontSize: "64px",
+							}}
+						>
+							{phrase?.words?.map(w => w?.text).join(" ")}
+						</p>
+					))}
+				</>
 			)}
 		</div>
 	);
